@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <artifactId>addon-imou</artifactId>
+
+  <modelVersion>4.0.0</modelVersion>
+  <name>Imou cloud</name>
+  <packaging>jar</packaging>
+
+  <parent>
+    <artifactId>addon-parent</artifactId>
+    <groupId>org.homio.addon</groupId>
+    <version>1.2.8-SNAPSHOT</version>
+  </parent>
+
+  <version>1.0.0-SNAPSHOT</version>
+</project>
