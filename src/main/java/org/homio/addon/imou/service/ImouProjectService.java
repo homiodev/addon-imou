@@ -29,7 +29,6 @@ public class ImouProjectService extends ServiceInstance<ImouProjectEntity> {
 
     public void initialize() {
         ImouAPI.setProjectEntity(entity);
-        entity.setStatus(Status.INITIALIZE);
         try {
             testService();
             entity.setStatusOnline();
@@ -37,10 +36,6 @@ public class ImouProjectService extends ServiceInstance<ImouProjectEntity> {
             context.getBean(ImouDiscoveryService.class).scan(context, null, null);
         } catch (ImouApiNotReadyException te) {
             scheduleInitialize();
-        } catch (Exception ex) {
-            entity.setStatusError(ex);
-        } finally {
-            updateNotificationBlock();
         }
     }
 
@@ -54,17 +49,13 @@ public class ImouProjectService extends ServiceInstance<ImouProjectEntity> {
     @Override
     @SneakyThrows
     protected void testService() {
-        if (!entity.isValid()) {
-            throw new IllegalStateException("Not valid configuration");
-        }
         if (!api.isConnected()) {
             api.login();
         }
     }
 
     @Override
-    public void destroy() {
-        updateNotificationBlock();
+    public void destroy(boolean forRestart, Exception ex) {
     }
 
     private void scheduleInitialize() {

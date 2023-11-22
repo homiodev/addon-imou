@@ -2,8 +2,10 @@ package org.homio.addon.imou;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -44,7 +46,7 @@ import org.jetbrains.annotations.Nullable;
 @Accessors(chain = true)
 @UISidebarChildren(icon = "fas fa-diagram-project", color = "#0088CC", allowCreateItem = false)
 public final class ImouProjectEntity extends MicroControllerBaseEntity
-    implements EntityService<ImouProjectService, ImouProjectEntity>,
+    implements EntityService<ImouProjectService>,
     HasStatusAndMsg, HasEntityLog {
 
     @UIField(order = 9999, disableEdit = true, hideInEdit = true)
@@ -68,10 +70,6 @@ public final class ImouProjectEntity extends MicroControllerBaseEntity
 
     @UIField(order = 1, hideInEdit = true, hideOnEmpty = true, fullWidth = true, bg = "#334842C2", type = UIFieldType.HTML)
     public String getDescription() {
-        String message = getStatusMessage();
-        if (message != null && message.contains(":")) {
-            return Lang.getServerMessage("IMOU.DESCRIPTION_" + message.split(":")[0]);
-        }
         return Lang.getServerMessage("IMOU.DESCRIPTION");
     }
 
@@ -130,8 +128,16 @@ public final class ImouProjectEntity extends MicroControllerBaseEntity
         entityLogBuilder.addTopicFilterByEntityID("org.homio");
     }
 
-    public boolean isValid() {
-        return !getAppUID().isEmpty() && !getAppSecret().asString().isEmpty();
+    @Override
+    public Set<String> getConfigurationErrors() {
+        Set<String> errors = new HashSet<>();
+        if (getAppUID().isEmpty()) {
+            errors.add("W.ERROR.NO_APP_UID");
+        }
+        if (getAppSecret().asString().isEmpty()) {
+            errors.add("W.ERROR.NO_ACCESS_SECRET");
+        }
+        return errors;
     }
 
     @Override

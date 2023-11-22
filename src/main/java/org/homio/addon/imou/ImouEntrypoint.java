@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ImouEntrypoint implements AddonEntrypoint {
 
-    public static final String IMOU_ICON = "fa fa-u";
+    public static final String IMOU_ICON = "fas fa-u";
     public static final String IMOU_COLOR = "#CC7D23";
 
     private final Context context;

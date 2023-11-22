@@ -68,12 +68,10 @@ import org.json.JSONObject;
                order = 150,
                bg = IMOU_COLOR,
                parent = TopSidebarMenu.DEVICES,
-               allowCreateNewItems = true,
                overridePath = "imou",
                filter = {"*:fas fa-filter:#8DBA73", "status:fas fa-heart-crack:#C452C4"},
                sort = {
                    "name~#FF9800:fas fa-arrow-up-a-z:fas fa-arrow-down-z-a",
-                   "updated~#7EAD28:fas fa-clock-rotate-left:fas fa-clock-rotate-left fa-flip-horizontal",
                    "status~#7EAD28:fas fa-turn-up:fas fa-turn-down",
                    "place~#9C27B0:fas fa-location-dot:fas fa-location-dot fa-rotate-180"
                })
@@ -82,7 +80,7 @@ public final class ImouDeviceEntity extends DeviceBaseEntity
     DeviceEndpointsBehaviourContract,
     HasFirmwareVersion,
     HasVideoSources,
-    EntityService<ImouDeviceService, ImouDeviceEntity>, HasEntityLog {
+    EntityService<ImouDeviceService>, HasEntityLog {
 
     public static final String PREFIX = "imou";
 
@@ -129,7 +127,6 @@ public final class ImouDeviceEntity extends DeviceBaseEntity
     public void setFetchDataInterval(int value) {
         setJsonData("fdi", value);
     }
-
 
     @UIField(order = 25)
     @UIFieldShowOnCondition("return !context.get('compactMode')")
@@ -240,6 +237,14 @@ public final class ImouDeviceEntity extends DeviceBaseEntity
         setJsonData("channels", OBJECT_MAPPER.writeValueAsString(device.channels));
         setImageIdentifier(device.deviceModel + ".png");
         return hashCode != getEntityHashCode();
+    }
+
+    @Override
+    public @Nullable Set<String> getConfigurationErrors() {
+        if (getCapabilities().isEmpty()) {
+            return Set.of("ERROR.NO_CAPABILITIES");
+        }
+        return null;
     }
 
     @Override

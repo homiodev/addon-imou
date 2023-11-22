@@ -2,7 +2,7 @@ package org.homio.addon.imou.service;
 
 import static java.util.Objects.requireNonNull;
 import static org.homio.addon.imou.ImouEntrypoint.IMOU_COLOR;
-import static org.homio.api.model.Status.ERROR;
+import static org.homio.addon.imou.ImouEntrypoint.IMOU_ICON;
 import static org.homio.api.model.Status.OFFLINE;
 import static org.homio.api.model.Status.ONLINE;
 import static org.homio.api.model.Status.SLEEPING;
@@ -22,7 +22,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.homio.addon.imou.ImouDeviceEndpoint;
 import org.homio.addon.imou.ImouDeviceEntity;
@@ -51,14 +50,12 @@ import org.homio.api.state.StringType;
 import org.homio.api.ui.UI;
 import org.homio.api.ui.UI.Image.Snapshot;
 import org.homio.api.ui.field.action.v1.UIInputBuilder;
-import org.homio.api.util.CommonUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * Handles commands and state updates
  */
-@Log4j2
 public class ImouDeviceService extends ServiceInstance<ImouDeviceEntity> {
 
     public static final ConfigDeviceDefinitionService CONFIG_DEVICE_SERVICE =
@@ -83,7 +80,7 @@ public class ImouDeviceService extends ServiceInstance<ImouDeviceEntity> {
     }
 
     @Override
-    public void destroy() {
+    public void destroy(boolean forRestart, Exception ex) {
         if (deviceStatusCheck != null) {
             deviceStatusCheck.cancel();
         }
@@ -118,20 +115,11 @@ public class ImouDeviceService extends ServiceInstance<ImouDeviceEntity> {
     }
 
     private void createEndpoints() {
-        try {
-            // check if we have endpoints and add them if available
-            List<String> capabilities = entity.getCapabilities();
-            if (!capabilities.isEmpty()) {
-                // fallback to retrieved schema
-                capabilities = capabilities.stream().filter(c -> !CONFIG_DEVICE_SERVICE.isIgnoreEndpoint(c)).sorted().collect(Collectors.toList());
-                buildEndpoints(capabilities);
-            } else {
-                setEntityStatus(OFFLINE, "No endpoints found");
-            }
-        } catch (Exception ex) {
-            setEntityStatus(ERROR, CommonUtils.getErrorMessage(ex));
-            log.error("[{}]: Error during initialize imou device: {}", entity.getEntityID(), CommonUtils.getErrorMessage(ex));
-        }
+        // check if we have endpoints and add them if available
+        List<String> capabilities = entity.getCapabilities();
+        // fallback to retrieved schema
+        capabilities = capabilities.stream().filter(c -> !CONFIG_DEVICE_SERVICE.isIgnoreEndpoint(c)).sorted().collect(Collectors.toList());
+        buildEndpoints(capabilities);
     }
 
     public String getCallbackUrl() {
@@ -369,7 +357,7 @@ public class ImouDeviceService extends ServiceInstance<ImouDeviceEntity> {
 
     private void createOrUpdateDeviceGroup() {
         context.var().createGroup("imou", "Imou", builder ->
-            builder.setIcon(new Icon("fas fa-u", IMOU_COLOR)).setLocked(true));
+            builder.setIcon(new Icon(IMOU_ICON, IMOU_COLOR)).setLocked(true));
         context.var().createSubGroup("imou", requireNonNull(entity.getIeeeAddress()), entity.getDeviceFullName(), builder ->
             builder.setIcon(entity.getEntityIcon()).setDescription(getGroupDescription()).setLocked(true));
     }
