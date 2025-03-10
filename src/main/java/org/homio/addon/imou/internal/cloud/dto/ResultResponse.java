@@ -10,16 +10,16 @@ import lombok.ToString;
 @ToString
 public class ResultResponse<T> {
 
-    private String id;
-    private Response<T> result;
+  private String id;
+  private Response<T> result;
 
-    @Getter
-    @Setter
-    @ToString
-    public static class Response<T> {
+  @Getter
+  @Setter
+  @ToString
+  public static class Response<T> {
 
-        private String msg;
-        private String code;
-        private T data;
-    }
+    private String msg;
+    private String code;
+    private T data;
+  }
 }

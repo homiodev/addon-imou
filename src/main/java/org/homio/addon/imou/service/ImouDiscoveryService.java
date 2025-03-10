@@ -1,14 +1,5 @@
 package org.homio.addon.imou.service;
 
-import static java.util.Objects.requireNonNull;
-import static org.homio.api.util.Constants.PRIMARY_DEVICE;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.homio.addon.imou.ImouDeviceEntity;
@@ -18,69 +9,24 @@ import org.homio.addon.imou.internal.cloud.dto.ImouDeviceDTO;
 import org.homio.api.Context;
 import org.homio.api.service.discovery.ItemDiscoverySupport;
 import org.homio.hquery.ProgressBar;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
+import static org.homio.api.util.Constants.PRIMARY_DEVICE;
 
 @Log4j2
 @Service
 public class ImouDiscoveryService implements ItemDiscoverySupport {
 
-    @Override
-    public String getName() {
-        return "scan-imou-devices";
-    }
-
-    @Override
-    public DeviceScannerResult scan(Context context, ProgressBar progressBar, String headerConfirmButtonKey) {
-        DeviceScannerResult result = new DeviceScannerResult();
-        Map<String, ImouDeviceEntity> existedDevices =
-            context.db().findAll(ImouDeviceEntity.class)
-                         .stream()
-                   .collect(Collectors.toMap(ImouDeviceEntity::getIeeeAddress, t -> t));
-        try {
-            ImouProjectEntity imouProjectEntity = context.db().getEntityRequire(ImouProjectEntity.class, PRIMARY_DEVICE);
-            Consumer<ImouDeviceDTO> deviceHandler = device -> {
-                ImouDeviceEntity deviceEntity = existedDevices.getOrDefault(device.deviceId, new ImouDeviceEntity());
-                if (updateImouDeviceEntity(device, imouProjectEntity.getService().getApi(), deviceEntity)) {
-                    context.db().save(deviceEntity);
-                    result.getNewCount().incrementAndGet();
-                } else {
-                    result.getExistedCount().incrementAndGet();
-                }
-            };
-            processDeviceResponse(List.of(), imouProjectEntity.getService(), 0, deviceHandler);
-        } catch (Exception ex) {
-            log.error("Error scan imou devices", ex);
-            context.ui().toastr().error(ex);
-        }
-
-        return result;
-    }
-
-    public List<ImouDeviceDTO> getDeviceList(Context context) {
-        List<ImouDeviceDTO> list = new ArrayList<>();
-        ImouProjectEntity entity = context.db().getEntityRequire(ImouProjectEntity.class, PRIMARY_DEVICE);
-        processDeviceResponse(List.of(), entity.getService(), 0, list::add);
-        return list;
-    }
-
-    @SneakyThrows
-    private void processDeviceResponse(
-        List<ImouDeviceDTO> deviceList,
-        ImouProjectService imouProjectService,
-        int page,
-        Consumer<ImouDeviceDTO> deviceHandler) {
-        for (ImouDeviceDTO device : deviceList) {
-            deviceHandler.accept(device);
-        }
-        if (page == 0 || deviceList.size() == 100) {
-            int nextPage = page + 1;
-            List<ImouDeviceDTO> nextDeviceList = imouProjectService.getApi().getDeviceList(nextPage);
-            processDeviceResponse(nextDeviceList, imouProjectService, nextPage, deviceHandler);
-        }
-    }
-
-    @SneakyThrows
-    public static boolean updateImouDeviceEntity(ImouDeviceDTO device, ImouAPI api, ImouDeviceEntity entity) {
+  @SneakyThrows
+  public static boolean updateImouDeviceEntity(ImouDeviceDTO device, ImouAPI api, ImouDeviceEntity entity) {
         /*List<FactoryInformation> infoList = api.getFactoryInformation(List.of(device.id), entity);
         String deviceMac = infoList.stream()
                                    .filter(fi -> fi.id.equals(device.id))
@@ -89,7 +35,7 @@ public class ImouDiscoveryService implements ItemDiscoverySupport {
                                    .orElse("")
                                    .replaceAll("(..)(?!$)", "$1:");*/
 
-        boolean updated = entity.tryUpdateDeviceEntity(device);
+    boolean updated = entity.tryUpdateDeviceEntity(device);
 
         /*DeviceSchema schema = api.getDeviceSchema(device.id, entity);
         Map<Integer, SchemaDp> schemaDps = new HashMap<>();
@@ -104,8 +50,63 @@ public class ImouDiscoveryService implements ItemDiscoverySupport {
             entity.setSchema(dps);
             updated = true;
         }*/
-        return updated;
+    return updated;
+  }
+
+  @Override
+  public String getName() {
+    return "scan-imou-devices";
+  }
+
+  @Override
+  public @Nullable DeviceScannerResult scan(@NotNull Context context, @NotNull ProgressBar progressBar) {
+    DeviceScannerResult result = new DeviceScannerResult();
+    Map<String, ImouDeviceEntity> existedDevices =
+      context.db().findAll(ImouDeviceEntity.class)
+        .stream()
+        .collect(Collectors.toMap(ImouDeviceEntity::getIeeeAddress, t -> t));
+    try {
+      ImouProjectEntity imouProjectEntity = context.db().getRequire(ImouProjectEntity.class, PRIMARY_DEVICE);
+      Consumer<ImouDeviceDTO> deviceHandler = device -> {
+        ImouDeviceEntity deviceEntity = existedDevices.getOrDefault(device.deviceId, new ImouDeviceEntity());
+        if (updateImouDeviceEntity(device, imouProjectEntity.getService().getApi(), deviceEntity)) {
+          context.db().save(deviceEntity);
+          result.getNewCount().incrementAndGet();
+        } else {
+          result.getExistedCount().incrementAndGet();
+        }
+      };
+      processDeviceResponse(List.of(), imouProjectEntity.getService(), 0, deviceHandler);
+    } catch (Exception ex) {
+      log.error("Error scan imou devices", ex);
+      context.ui().toastr().error(ex);
     }
+
+    return result;
+  }
+
+  public List<ImouDeviceDTO> getDeviceList(Context context) {
+    List<ImouDeviceDTO> list = new ArrayList<>();
+    ImouProjectEntity entity = context.db().getRequire(ImouProjectEntity.class, PRIMARY_DEVICE);
+    processDeviceResponse(List.of(), entity.getService(), 0, list::add);
+    return list;
+  }
+
+  @SneakyThrows
+  private void processDeviceResponse(
+    List<ImouDeviceDTO> deviceList,
+    ImouProjectService imouProjectService,
+    int page,
+    Consumer<ImouDeviceDTO> deviceHandler) {
+    for (ImouDeviceDTO device : deviceList) {
+      deviceHandler.accept(device);
+    }
+    if (page == 0 || deviceList.size() == 100) {
+      int nextPage = page + 1;
+      List<ImouDeviceDTO> nextDeviceList = imouProjectService.getApi().getDeviceList(nextPage);
+      processDeviceResponse(nextDeviceList, imouProjectService, nextPage, deviceHandler);
+    }
+  }
 
     /*private static void filterAndConfigureSchema(List<SchemaDp> schemaDps) {
         Map<String, SchemaDp> schemaCode2Schema = schemaDps.stream().collect(Collectors.toMap(SchemaDp::getCode, s -> s));

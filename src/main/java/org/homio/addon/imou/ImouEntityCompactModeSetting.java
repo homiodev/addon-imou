@@ -8,28 +8,28 @@ import org.jetbrains.annotations.NotNull;
 
 public class ImouEntityCompactModeSetting implements SettingPluginToggle {
 
-    @Override
-    public Class<? extends BaseEntity> availableForEntity() {
-        return ImouDeviceEntity.class;
-    }
+  @Override
+  public Class<? extends BaseEntity> availableForEntity() {
+    return ImouDeviceEntity.class;
+  }
 
-    @Override
-    public int order() {
-        return 20;
-    }
+  @Override
+  public int order() {
+    return 20;
+  }
 
-    @Override
-    public @NotNull Icon getIcon() {
-        return new Icon("fas fa-minimize");
-    }
+  @Override
+  public @NotNull Icon getIcon() {
+    return new Icon("fas fa-minimize");
+  }
 
-    @Override
-    public @NotNull Icon getToggleIcon() {
-        return new Icon("fas fa-maximize");
-    }
+  @Override
+  public @NotNull Icon getToggleIcon() {
+    return new Icon("fas fa-maximize");
+  }
 
-    @Override
-    public boolean isVisible(Context context) {
-        return false;
-    }
+  @Override
+  public boolean isVisible(Context context) {
+    return false;
+  }
 }

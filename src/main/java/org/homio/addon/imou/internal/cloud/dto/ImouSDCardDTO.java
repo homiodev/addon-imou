@@ -9,17 +9,17 @@ import lombok.ToString;
 @ToString
 public class ImouSDCardDTO {
 
-    private String status;
+  private String status;
 
-    @Getter
-    @Setter
-    public static class ImouSDCardStatusDTO {
+  @Getter
+  @Setter
+  public static class ImouSDCardStatusDTO {
 
-        private long totalBytes;
-        private long usedBytes;
+    private long totalBytes;
+    private long usedBytes;
 
-        public String toString() {
-            return (int) ((double) usedBytes / (1024 * 1024)) + "/" + (int) ((double) totalBytes / (1024 * 1024));
-        }
+    public String toString() {
+      return (int) ((double) usedBytes / (1024 * 1024)) + "/" + (int) ((double) totalBytes / (1024 * 1024));
     }
+  }
 }

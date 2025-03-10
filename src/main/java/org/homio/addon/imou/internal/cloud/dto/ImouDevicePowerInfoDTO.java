@@ -9,16 +9,16 @@ import lombok.ToString;
 @ToString
 public class ImouDevicePowerInfoDTO {
 
-    private Electricitys electricitys;
+  private Electricitys electricitys;
 
-    @Getter
-    @Setter
-    @ToString
-    public static class Electricitys {
+  @Getter
+  @Setter
+  @ToString
+  public static class Electricitys {
 
-        private String alkElec;
-        private String litElec;
-        private String electric;
-        private String type;
-    }
+    private String alkElec;
+    private String litElec;
+    private String electric;
+    private String type;
+  }
 }

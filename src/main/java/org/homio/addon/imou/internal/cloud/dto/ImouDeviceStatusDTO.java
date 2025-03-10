@@ -9,6 +9,6 @@ import lombok.ToString;
 @ToString
 public class ImouDeviceStatusDTO {
 
-    private String enableType;
-    private String status;
+  private String enableType;
+  private String status;
 }

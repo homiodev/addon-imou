@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ImouTokenDTO {
-    private int expireTime;
-    private String currentDomain;
-    private String accessToken;
+  private int expireTime;
+  private String currentDomain;
+  private String accessToken;
 }

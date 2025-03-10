@@ -9,7 +9,7 @@ import lombok.ToString;
 @ToString
 public class ImouDeviceCallbackUrlDTO {
 
-    private String status;
-    private String callbackUrl;
-    private String callbackFlag;
+  private String status;
+  private String callbackUrl;
+  private String callbackFlag;
 }
